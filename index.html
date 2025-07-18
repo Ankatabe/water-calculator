@@ -2,47 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>დალეული წყლის კალკულატორი</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>დალეული წყლის კალკულატორი</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* კონტენტი ზემოდან დაიწყოს */
             min-height: 100vh;
             margin: 0;
-            background-color: #FFFFFF; /* გვერდის ფონი - დაყენებულია თეთრად (ვარაუდით, სპრაიტის ფონიც თეთრია/გამჭვირვალეა) */
+            background-color: #FFFFFF;
             overflow: hidden; /* აუცილებელია ძაღლის ანიმაციისთვის */
-            position: relative; /* საჭიროა ძაღლის აბსოლუტური პოზიციონირებისთვის */
+            position: relative;
+            padding-top: 20px;
+            padding-bottom: 20px; /* დავტოვოთ სიცარიელე ძაღლისთვის */
+            box-sizing: border-box; /* padding-ის სწორი გათვალისწინებისთვის */
         }
 
         .container {
-            position: relative; /* საჭიროა წყლის ფენისთვის */
+            position: relative;
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 350px;
-            max-width: 90%;
-            z-index: 10; /* კალკულატორი ძაღლზე მაღლა იყოს */
-            margin-bottom: 20px; /* დავწიოთ კალკულატორი ცოტა ზემოთ, რომ ძაღლს მეტი ადგილი ჰქონდეს */
-            overflow: hidden; /* აუცილებელია, რომ წყლის ფენა არ გამოვიდეს კონტეინერიდან */
+            max-width: 90%; /* Max-width დარჩა, რომ ძალიან დიდ ეკრანზეც არ იყოს გაწელილი */
+            z-index: 10;
+            margin-bottom: 20px; /* კონტეინერსა და ძაღლს შორის მანძილი */
+            overflow: hidden;
         }
 
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 25px;
-            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
-            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+            position: relative;
+            z-index: 2;
         }
 
         .form-group {
             margin-bottom: 18px;
-            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
-            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+            position: relative;
+            z-index: 2;
         }
 
         label {
@@ -54,7 +56,7 @@
 
         input[type="number"],
         select {
-            width: calc(100% - 22px); /* Padding-ის გათვალისწინებით */
+            width: calc(100% - 22px);
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -72,8 +74,8 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
             margin-top: 20px;
-            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
-            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+            position: relative;
+            z-index: 2;
         }
 
         button:hover {
@@ -86,9 +88,9 @@
             background-color: #e9ecef;
             border-radius: 8px;
             border-left: 5px solid #007bff;
-            display: none; /* თავიდან დამალულია */
-            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
-            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+            display: none;
+            position: relative;
+            z-index: 2;
         }
 
         #results p {
@@ -107,22 +109,21 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 0%; /* საწყისი სიმაღლე 0 */
+            height: 0%;
             background-color: #87CEEB; /* ღია ცისფერი (წყლის ფერი) */
-            border-bottom-left-radius: 8px; /* კონტეინერის რადიუსს გაყვეს */
-            border-bottom-right-radius: 8px; /* კონტეინერის რადიუსს გაყვეს */
-            transition: height 1s ease-out; /* გლუვი ანიმაცია სიმაღლის ცვლილებისთვის */
-            z-index: 1; /* ფორმის ელემენტების უკან, მაგრამ კონტეინერის ფონზე წინ */
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            transition: height 1s ease-out;
+            z-index: 1;
         }
-
 
         /* ძაღლის ანიმაციის სტილები */
         .dog-animation {
-            width: 752px;  /* ერთი ფრეიმის ორიგინალი სიგანე */
-            height: 808px; /* ერთი ფრეიმის ორიგინალი სიმაღლე */
-            background-image: url('5348821.png'); /* სპრაიტის სურათი */
+            width: 752px;
+            height: 808px;
+            background-image: url('5348821.png'); /* დარწმუნდით, რომ ეს ფაილი იმავე საქაღალდეშია */
             background-repeat: no-repeat;
-            background-position: 0 0; /* საწყისი პოზიცია */
+            background-position: 0 0;
             transform: scale(0.333); /* 1/3-ზე შემცირება */
             transform-origin: bottom left; /* მასშტაბირების საწყისი წერტილი - ქვედა მარცხენა */
             position: absolute;
@@ -139,18 +140,18 @@
         /* CSS ანიმაცია ძაღლის მოძრაობისთვის */
         @keyframes moveDog {
             0% {
-                left: -300px; /* დაიწყოს ეკრანის მარცხენა ბოლოდან */
+                left: -300px;
             }
             100% {
-                left: 100vw; /* მივიდეს ეკრანის მარჯვენა ბოლომდე */
+                left: 100vw;
             }
         }
 
         /* კლასი, რომელიც დაემატება JavaScript-დან ანიმაციის გასაშვებად */
         .dog-move-active {
-            display: block; /* გამოჩნდეს */
+            display: block;
             animation: moveDog linear forwards; /* ერთხელ გაიაროს და გაჩერდეს ბოლოს */
-            animation-duration: 13.34s; /* ანიმაციის ხანგრძლივობა (2-ჯერ ნელა: 6.67s * 2 = 13.34s) */
+            animation-duration: 13.34s; /* ანიმაციის ხანგრძლივობა (2-ჯერ ნელა) */
         }
     </style>
 </head>
@@ -201,7 +202,7 @@
             const consumedWaterSpan = document.getElementById('consumedWater');
             const percentageSpan = document.getElementById('percentage');
             const animatedDog = document.getElementById('animatedDog');
-            const waterFillDiv = document.getElementById('water-fill'); // ახალი ელემენტი
+            const waterFillDiv = document.getElementById('water-fill');
 
             // ძაღლის ანიმაციის პარამეტრები
             const frameWidth = 752;
@@ -238,7 +239,29 @@
                 animatedDog.style.display = 'none';
             });
 
+            // --- Viewport Scaling Logic ---
+            function setViewportScale() {
+                const viewportMeta = document.querySelector('meta[name="viewport"]');
+                const screenWidth = window.innerWidth;
+                const initialScale = viewportMeta.getAttribute('content').match(/initial-scale=([0-9.]+)/)[1];
 
+                // ზღურბლი, რომლის ქვემოთაც გვინდა ზუმ-აუთი
+                const mobileBreakpoint = 600; // შეგიძლიათ შეცვალოთ ეს მნიშვნელობა
+
+                if (screenWidth < mobileBreakpoint && initialScale === '1.0') {
+                    // თუ მობილურზე ვართ და მასშტაბი 1.0-ზეა
+                    viewportMeta.setAttribute('content', `width=device-width, initial-scale=0.5, user-scalable=yes`);
+                } else if (screenWidth >= mobileBreakpoint && initialScale !== '1.0') {
+                    // თუ დესკტოპზე ვართ და მასშტაბი 0.5-ზეა
+                    viewportMeta.setAttribute('content', `width=device-width, initial-scale=1.0, user-scalable=yes`);
+                }
+            }
+
+            // მოვლენის ლიდერები
+            window.addEventListener('load', setViewportScale);
+            window.addEventListener('resize', setViewportScale); // ეკრანის ზომის შეცვლისას (მაგ. როტაციისას)
+
+            // --- Calculator Logic ---
             calculateBtn.addEventListener('click', () => {
                 const gender = document.getElementById('gender').value;
                 const weight = parseFloat(document.getElementById('weight').value);
@@ -266,17 +289,16 @@
 
                 let percentage = 0;
                 if (requiredWaterML > 0) {
-                    percentage = ((consumedWaterML / requiredWaterML) * 100); // პროცენტი მთელი რიცხვით
+                    percentage = ((consumedWaterML / requiredWaterML) * 100);
                 }
 
                 requiredWaterSpan.textContent = requiredWaterL;
                 consumedWaterSpan.textContent = consumedWaterL;
-                percentageSpan.textContent = percentage.toFixed(2); // პროცენტი 2 ათობითი ნიშნით
+                percentageSpan.textContent = percentage.toFixed(2);
 
                 resultsDiv.style.display = 'block';
 
-                // წყლის დონის განახლება
-                let fillPercentage = Math.min(percentage, 100); // არასდროს არ გადაცდეს 100%-ს
+                let fillPercentage = Math.min(percentage, 100);
                 waterFillDiv.style.height = `${fillPercentage}%`;
 
 
