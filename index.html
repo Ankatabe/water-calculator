@@ -2,22 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>დალეული წყლის კალკულატორი</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>დალეული წყლის კალკულატორი</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* კონტენტი ზემოდან დაიწყოს */
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
             background-color: #FFFFFF;
-            overflow: hidden; /* აუცილებელია ძაღლის ანიმაციისთვის */
+            overflow-x: hidden; /* ჰორიზონტალური სქროლის თავიდან ასაცილებლად */
             position: relative;
             padding-top: 20px;
-            padding-bottom: 20px; /* დავტოვოთ სიცარიელე ძაღლისთვის */
-            box-sizing: border-box; /* padding-ის სწორი გათვალისწინებისთვის */
+            padding-bottom: 20px;
+            box-sizing: border-box;
+
+            /* ნაგულისხმევი მასშტაბი დესკტოპისთვის */
+            transform: scale(1);
+            transform-origin: top center; /* ზედა ცენტრიდან მოხდეს მასშტაბირება */
+            width: 100%; /* დარწმუნდეს, რომ სრულ სიგანეს იკავებს */
         }
 
         .container {
@@ -27,9 +33,9 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 350px;
-            max-width: 90%; /* Max-width დარჩა, რომ ძალიან დიდ ეკრანზეც არ იყოს გაწელილი */
+            max-width: 90%;
             z-index: 10;
-            margin-bottom: 20px; /* კონტეინერსა და ძაღლს შორის მანძილი */
+            margin-bottom: 20px;
             overflow: hidden;
         }
 
@@ -110,7 +116,7 @@
             left: 0;
             right: 0;
             height: 0%;
-            background-color: #87CEEB; /* ღია ცისფერი (წყლის ფერი) */
+            background-color: #87CEEB;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
             transition: height 1s ease-out;
@@ -121,16 +127,16 @@
         .dog-animation {
             width: 752px;
             height: 808px;
-            background-image: url('5348821.png'); /* დარწმუნდით, რომ ეს ფაილი იმავე საქაღალდეშია */
+            background-image: url('5348821.png');
             background-repeat: no-repeat;
             background-position: 0 0;
             transform: scale(0.333); /* 1/3-ზე შემცირება */
-            transform-origin: bottom left; /* მასშტაბირების საწყისი წერტილი - ქვედა მარცხენა */
+            transform-origin: bottom left;
             position: absolute;
-            bottom: 0; /* სულ დაბლა */
-            left: -300px; /* თავიდან ეკრანის გარეთ, მარცხნივ */
-            display: none; /* თავიდან დამალულია */
-            z-index: 5; /* კალკულატორის უკან იყოს */
+            bottom: 0;
+            left: -300px;
+            display: none;
+            z-index: 5;
 
             image-rendering: crisp-edges;
             image-rendering: -webkit-optimize-contrast;
@@ -147,12 +153,53 @@
             }
         }
 
-        /* კლასი, რომელიც დაემატება JavaScript-დან ანიმაციის გასაშვებად */
         .dog-move-active {
             display: block;
-            animation: moveDog linear forwards; /* ერთხელ გაიაროს და გაჩერდეს ბოლოს */
-            animation-duration: 13.34s; /* ანიმაციის ხანგრძლივობა (2-ჯერ ნელა) */
+            animation: moveDog linear forwards;
+            animation-duration: 13.34s;
         }
+
+        /* --- მობილური მოწყობილობების ადაპტაცია (ავტომატური ზუმ-აუთი) --- */
+        @media (max-width: 768px) { /* ეკრანის სიგანე 768px-ზე ნაკლები */
+            body {
+                transform: scale(0.6); /* 60% მასშტაბი (50% ძალიან პატარა იქნება) */
+                transform-origin: top center; /* მასშტაბირება ზედა ცენტრიდან */
+                width: calc(100% / 0.6); /* გამოვთვლით საჭირო სიგანეს, რომ შიგთავსი მოერგოს */
+                margin: 0 auto; /* ცენტრში განთავსება */
+                padding-top: 50px; /* ზედა ნაწილს ცოტა ჩამოწევა */
+                padding-bottom: 50px; /* ქვედა ნაწილსაც ცოტა სიცარიელე */
+            }
+
+            .container {
+                margin-bottom: 20px; /* ძაღლი ახლა 50%-ით დაპატარავებულ body-ზე იქნება */
+            }
+
+            /* ძაღლის ანიმაციისთვის შეიძლება არ დაგვჭირდეს ცალკე scale, რადგან body მასშტაბირდება */
+            .dog-animation {
+                bottom: 0; /* რადგან body დაპატარავდება, ძაღლიც დაპატარავდება და თავისუფალი ადგილიც გაჩნდება */
+                transform: scale(0.333); /* დარჩეს იგივე, რადგან body უკვე მასშტაბირდება */
+                left: -200px; /* საწყისი პოზიცია შევამციროთ ოდნავ */
+            }
+
+            @keyframes moveDog {
+                0% {
+                    left: -200px;
+                }
+                100% {
+                    left: 100vw; /* ეს ნიშნავს viewport-ის სიგანეს, რომელიც უკვე 0.5 მასშტაბზეა */
+                }
+            }
+        }
+
+        /* თუ მაინც გინდათ 50%, შეგიძლიათ სცადოთ, მაგრამ შეიძლება ძალიან პატარა გამოჩნდეს */
+        /*
+        @media (max-width: 600px) {
+            body {
+                transform: scale(0.5); // 50% მასშტაბი
+                width: calc(100% / 0.5);
+            }
+        }
+        */
     </style>
 </head>
 <body>
@@ -234,32 +281,12 @@
 
             animatedDog.addEventListener('animationend', () => {
                 animatedDog.classList.remove('dog-move-active');
+                // left პოზიცია უნდა გადაანგარიშდეს, რადგან body-ს scale-ს აქვს გავლენა
+                // უბრალოდ ისევ ეკრანის გარეთ გაშვება საკმარისი იქნება
                 animatedDog.style.left = '-300px';
                 clearInterval(frameAnimationInterval);
                 animatedDog.style.display = 'none';
             });
-
-            // --- Viewport Scaling Logic ---
-            function setViewportScale() {
-                const viewportMeta = document.querySelector('meta[name="viewport"]');
-                const screenWidth = window.innerWidth;
-                const initialScale = viewportMeta.getAttribute('content').match(/initial-scale=([0-9.]+)/)[1];
-
-                // ზღურბლი, რომლის ქვემოთაც გვინდა ზუმ-აუთი
-                const mobileBreakpoint = 600; // შეგიძლიათ შეცვალოთ ეს მნიშვნელობა
-
-                if (screenWidth < mobileBreakpoint && initialScale === '1.0') {
-                    // თუ მობილურზე ვართ და მასშტაბი 1.0-ზეა
-                    viewportMeta.setAttribute('content', `width=device-width, initial-scale=0.5, user-scalable=yes`);
-                } else if (screenWidth >= mobileBreakpoint && initialScale !== '1.0') {
-                    // თუ დესკტოპზე ვართ და მასშტაბი 0.5-ზეა
-                    viewportMeta.setAttribute('content', `width=device-width, initial-scale=1.0, user-scalable=yes`);
-                }
-            }
-
-            // მოვლენის ლიდერები
-            window.addEventListener('load', setViewportScale);
-            window.addEventListener('resize', setViewportScale); // ეკრანის ზომის შეცვლისას (მაგ. როტაციისას)
 
             // --- Calculator Logic ---
             calculateBtn.addEventListener('click', () => {
