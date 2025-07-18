@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>დალეული წყლის კალკულატორი</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"> <title>დალეული წყლის კალკულატორი</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,13 +16,14 @@
             overflow-x: hidden; /* ჰორიზონტალური სქროლის თავიდან ასაცილებლად */
             position: relative;
             padding-top: 20px;
-            padding-bottom: 20px;
+            padding-bottom: 20px; /* დავტოვოთ სიცარიელე ძაღლისთვის */
             box-sizing: border-box;
 
             /* ნაგულისხმევი მასშტაბი დესკტოპისთვის */
             transform: scale(1);
-            transform-origin: top center; /* ზედა ცენტრიდან მოხდეს მასშტაბირება */
-            width: 100%; /* დარწმუნდეს, რომ სრულ სიგანეს იკავებს */
+            transform-origin: top center;
+            width: 100%;
+            transition: transform 0.3s ease-out; /* Add transition for smooth scaling */
         }
 
         .container {
@@ -35,7 +35,7 @@
             width: 350px;
             max-width: 90%;
             z-index: 10;
-            margin-bottom: 20px;
+            /* margin-bottom: 20px; - ეს აღარ გვჭირდება, ძაღლს უკვე ფიქსირებული პოზიცია ექნება მობილურზე */
             overflow: hidden;
         }
 
@@ -133,7 +133,7 @@
             transform: scale(0.333); /* 1/3-ზე შემცირება */
             transform-origin: bottom left;
             position: absolute;
-            bottom: 0;
+            bottom: 0; /* დესკტოპზე სულ დაბლა */
             left: -300px;
             display: none;
             z-index: 5;
@@ -159,52 +159,76 @@
             animation-duration: 13.34s;
         }
 
-        /* --- მობილური მოწყობილობების ადაპტაცია (ავტომატური ზუმ-აუთი) --- */
-        @media (max-width: 768px) { /* ეკრანის სიგანე 768px-ზე ნაკლები */
+        /* --- მობილური მოწყობილობების ადაპტაცია --- */
+        @media (max-width: 768px) {
             body {
-                transform: scale(0.6); /* 60% მასშტაბი (50% ძალიან პატარა იქნება) */
-                transform-origin: top center; /* მასშტაბირება ზედა ცენტრიდან */
-                width: calc(100% / 0.6); /* გამოვთვლით საჭირო სიგანეს, რომ შიგთავსი მოერგოს */
-                margin: 0 auto; /* ცენტრში განთავსება */
-                padding-top: 50px; /* ზედა ნაწილს ცოტა ჩამოწევა */
-                padding-bottom: 50px; /* ქვედა ნაწილსაც ცოტა სიცარიელე */
+                transform: scale(0.5); /* ავტომატური ზუმ-აუთი 50% */
+                transform-origin: top center;
+                width: calc(100% / 0.5); /* საჭირო სიგანე, რომ შიგთავსი მოერგოს */
+                margin: 0 auto;
+                padding-top: 40px; /* ცოტა სიცარიელე ზემოდან */
+                padding-bottom: 40px; /* ცოტა სიცარიელე ქვემოდან */
+                min-height: auto; /* არ დავაწესოთ მინიმალური სიმაღლე აქ */
             }
 
             .container {
-                margin-bottom: 20px; /* ძაღლი ახლა 50%-ით დაპატარავებულ body-ზე იქნება */
+                /* margin-bottom აღარ არის საჭირო აქ, რადგან ძაღლი აბსოლუტურად განთავსდება */
             }
 
-            /* ძაღლის ანიმაციისთვის შეიძლება არ დაგვჭირდეს ცალკე scale, რადგან body მასშტაბირდება */
             .dog-animation {
-                bottom: 0; /* რადგან body დაპატარავდება, ძაღლიც დაპატარავდება და თავისუფალი ადგილიც გაჩნდება */
-                transform: scale(0.333); /* დარჩეს იგივე, რადგან body უკვე მასშტაბირდება */
-                left: -200px; /* საწყისი პოზიცია შევამციროთ ოდნავ */
+                /*
+                 * ძაღლის პოზიცია მობილურზე
+                 * ვივარაუდოთ, რომ .container-ის სიმაღლე არის დაახლოებით 500px (padding-ის, input-ების და margin-ების ჩათვლით).
+                 * body-ს აქვს padding-bottom 40px.
+                 * ამიტომ, ძაღლის ქვედა კიდე რომ container-ის ქვედა კიდეს დაემთხვეს,
+                 * ძაღლის bottom პოზიცია უნდა იყოს: (container-ის სიმაღლე + padding-bottom) * body-ის scale
+                 * ან უბრალოდ, სავარაუდო სიმაღლიდან გამოვაკლოთ ძაღლის სიმაღლის 50% (რადგან 0.5 scale-ზეა body)
+                 *
+                 * უფრო მარტივი გზა: დავაყენოთ ძაღლის bottom პოზიცია `container`-ის ქვემოთ.
+                 * ვინაიდან body სკალირდება 0.5-ზე, 100vh გადაიქცევა 50vh-ად,
+                 * ხოლო ეკრანის ზედა ნაწილშია კალკულატორი.
+                 * სცადოთ 0, და თუ ძალიან დაბლაა, ნელ-ნელა გაზარდოთ.
+                 */
+                bottom: calc(40px / 0.5); /* body-ს padding-bottom-ს შეესაბამება 80px-ს, რადგან body 0.5-ზეა */
+                /* ამას დავამატოთ container-ის სავარაუდო სიმაღლე, რომ მის ქვემოთ მოექცეს */
+                /* ვინაიდან container არის 350px სიგანის და აქვს padding 30px, სავარაუდო სიმაღლე 450-550px იქნება.
+                   მოდით, ვცადოთ container-ის ზომაზე დაფუძნებული გათვლა */
+                /* ძაღლის bottom პოზიცია container-ის ქვემოთ 20px-ით */
+                bottom: calc((100vh - 550px) / 0.5); /* 550px არის container-ის სავარაუდო მაქსიმალური სიმაღლე 1.0 მასშტაბზე */
+                /* ან უფრო მარტივად და თვალით გასწორება */
+                bottom: 80px; /* ეს არის დაახლოებით 40px * 2 (body scale-ის გამო). შეიძლება საჭირო გახდეს კორექტირება */
+                
+                /*
+                 * ყველაზე ეფექტური იქნება, თუ ძაღლის ქვედა წერტილს დავუმიზნებთ container-ის ქვედა წერტილს.
+                 * container-ის სიმაღლე სკალირების გარეშე დაახლოებით 500-550px-ია (დამოკიდებულია კონტენტზე).
+                 * ძაღლის მასშტაბირებული სიმაღლეა 808px * 0.333 = ~269px.
+                 * თუ container-ის bottom არის 0, და ძაღლის bottom არის 0, მაშინ ძაღლი კონტეინერს გადაფარავს.
+                 *
+                 * მოდით, დავუმიზნოთ ძაღლის ზედა კიდეს container-ის ქვედა კიდეს.
+                 * ანუ, ძაღლი გამოჩნდება container-ის ქვემოთ.
+                 */
+                top: calc(100% + 20px); /* 20px-ით container-ის ქვემოთ */
+                position: absolute; /* აბსოლუტური პოზიცია */
+                transform: scale(0.25); /* მობილურზე ძაღლი კიდევ უფრო პატარა იყოს (1/4) */
+                transform-origin: bottom left;
+                left: -150px; /* საწყისი პოზიცია შევამციროთ */
+                /* რადგან top-ს ვიყენებთ, bottom აღარ გვჭირდება */
+                bottom: auto;
             }
 
             @keyframes moveDog {
                 0% {
-                    left: -200px;
+                    left: -150px;
                 }
                 100% {
-                    left: 100vw; /* ეს ნიშნავს viewport-ის სიგანეს, რომელიც უკვე 0.5 მასშტაბზეა */
+                    left: 100vw;
                 }
             }
         }
-
-        /* თუ მაინც გინდათ 50%, შეგიძლიათ სცადოთ, მაგრამ შეიძლება ძალიან პატარა გამოჩნდეს */
-        /*
-        @media (max-width: 600px) {
-            body {
-                transform: scale(0.5); // 50% მასშტაბი
-                width: calc(100% / 0.5);
-            }
-        }
-        */
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="water-fill"></div>
+    <div class="container" id="calculatorContainer"> <div id="water-fill"></div>
 
         <h1>დალეული წყლის კალკულატორი</h1>
         <div class="form-group">
@@ -228,7 +252,7 @@
         </div>
         <div class="form-group">
             <label for="cupCount">ჭიქის რაოდენობა:</label>
-            <input type="number" id="cupCount" min="0" step="1" value="0" placeholder="შეიყვანეთ დალეული ჭიქების რაოდენობა" required>
+            <input type="number" id="cupCount" min="0" step="1" value="0" placeholder="შეიყვანეთ დალეული ჭიქების რაოდomination" required>
         </div>
         <button id="calculateBtn">კალკულაცია</button>
 
@@ -250,6 +274,8 @@
             const percentageSpan = document.getElementById('percentage');
             const animatedDog = document.getElementById('animatedDog');
             const waterFillDiv = document.getElementById('water-fill');
+            const calculatorContainer = document.getElementById('calculatorContainer'); // კონტეინერის ელემენტი
+            const bodyElement = document.body; // body ელემენტი
 
             // ძაღლის ანიმაციის პარამეტრები
             const frameWidth = 752;
@@ -281,12 +307,35 @@
 
             animatedDog.addEventListener('animationend', () => {
                 animatedDog.classList.remove('dog-move-active');
-                // left პოზიცია უნდა გადაანგარიშდეს, რადგან body-ს scale-ს აქვს გავლენა
-                // უბრალოდ ისევ ეკრანის გარეთ გაშვება საკმარისი იქნება
                 animatedDog.style.left = '-300px';
                 clearInterval(frameAnimationInterval);
                 animatedDog.style.display = 'none';
             });
+
+            // ფუნქცია body-ს მასშტაბის დასაყენებლად (ავტომატური ზუმ-აუთი)
+            function applyBodyScale() {
+                const screenWidth = window.innerWidth;
+                const mobileBreakpoint = 768; // ეკრანის სიგანე, რომლის ქვემოთაც მობილურად მივიჩნევთ
+                const scaleFactor = 0.5; // 50% ზუმ-აუთი
+
+                if (screenWidth <= mobileBreakpoint) {
+                    bodyElement.style.transform = `scale(${scaleFactor})`;
+                    bodyElement.style.width = `calc(100% / ${scaleFactor})`;
+                    bodyElement.style.margin = '0 auto';
+                    bodyElement.style.paddingTop = '40px';
+                    bodyElement.style.paddingBottom = '40px'; // შეიძლება საჭირო გახდეს კორექტირება
+                } else {
+                    bodyElement.style.transform = 'scale(1)';
+                    bodyElement.style.width = '100%';
+                    bodyElement.style.margin = '0';
+                    bodyElement.style.paddingTop = '20px';
+                    bodyElement.style.paddingBottom = '20px';
+                }
+            }
+
+            // გვერდის ჩატვირთვისას და ეკრანის ზომის შეცვლისას
+            window.addEventListener('load', applyBodyScale);
+            window.addEventListener('resize', applyBodyScale);
 
             // --- Calculator Logic ---
             calculateBtn.addEventListener('click', () => {
@@ -327,6 +376,12 @@
 
                 let fillPercentage = Math.min(percentage, 100);
                 waterFillDiv.style.height = `${fillPercentage}%`;
+
+                // --- კალკულაციაზე დაჭერის შემდეგ ზუმ-აუთის ხელახლა გაკეთება ---
+                // მობილურზე ზუმ-ინ შეიძლება მოხდეს შეყვანისას, ამიტომ კალკულაციაზე დაჭერისას აღვადგენთ მასშტაბს
+                if (window.innerWidth <= 768) { // თუ მობილურ ეკრანზე ვართ
+                    applyBodyScale(); // ხელახლა გამოვიძახოთ მასშტაბირების ფუნქცია
+                }
 
 
                 // ძაღლის ანიმაციის გაშვება
