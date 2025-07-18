@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>დალეული წყლის კალკულატორი</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #FFFFFF; /* გვერდის ფონი - დაყენებულია თეთრად (ვარაუდით, სპრაიტის ფონიც თეთრია/გამჭვირვალეა) */
+            overflow: hidden; /* აუცილებელია ძაღლის ანიმაციისთვის */
+            position: relative; /* საჭიროა ძაღლის აბსოლუტური პოზიციონირებისთვის */
+        }
+
+        .container {
+            position: relative; /* საჭიროა წყლის ფენისთვის */
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            max-width: 90%;
+            z-index: 10; /* კალკულატორი ძაღლზე მაღლა იყოს */
+            margin-bottom: 20px; /* დავწიოთ კალკულატორი ცოტა ზემოთ, რომ ძაღლს მეტი ადგილი ჰქონდეს */
+            overflow: hidden; /* აუცილებელია, რომ წყლის ფენა არ გამოვიდეს კონტეინერიდან */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
+            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
+            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="number"],
+        select {
+            width: calc(100% - 22px); /* Padding-ის გათვალისწინებით */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
+            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+            display: none; /* თავიდან დამალულია */
+            position: relative; /* წყლის ფენაზე მაღლა რომ იყოს */
+            z-index: 2; /* წყლის ფენაზე მაღლა რომ იყოს */
+        }
+
+        #results p {
+            margin: 8px 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        #results p strong {
+            color: #0056b3;
+        }
+
+        /* წყლის შემვსები ფენა */
+        #water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%; /* საწყისი სიმაღლე 0 */
+            background-color: #87CEEB; /* ღია ცისფერი (წყლის ფერი) */
+            border-bottom-left-radius: 8px; /* კონტეინერის რადიუსს გაყვეს */
+            border-bottom-right-radius: 8px; /* კონტეინერის რადიუსს გაყვეს */
+            transition: height 1s ease-out; /* გლუვი ანიმაცია სიმაღლის ცვლილებისთვის */
+            z-index: 1; /* ფორმის ელემენტების უკან, მაგრამ კონტეინერის ფონზე წინ */
+        }
+
+
+        /* ძაღლის ანიმაციის სტილები */
+        .dog-animation {
+            width: 752px;  /* ერთი ფრეიმის ორიგინალი სიგანე */
+            height: 808px; /* ერთი ფრეიმის ორიგინალი სიმაღლე */
+            background-image: url('5348821.png'); /* სპრაიტის სურათი */
+            background-repeat: no-repeat;
+            background-position: 0 0; /* საწყისი პოზიცია */
+            transform: scale(0.333); /* 1/3-ზე შემცირება */
+            transform-origin: bottom left; /* მასშტაბირების საწყისი წერტილი - ქვედა მარცხენა */
+            position: absolute;
+            bottom: 0; /* სულ დაბლა */
+            left: -300px; /* თავიდან ეკრანის გარეთ, მარცხნივ */
+            display: none; /* თავიდან დამალულია */
+            z-index: 5; /* კალკულატორის უკან იყოს */
+
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimizeSpeed;
+        }
+
+        /* CSS ანიმაცია ძაღლის მოძრაობისთვის */
+        @keyframes moveDog {
+            0% {
+                left: -300px; /* დაიწყოს ეკრანის მარცხენა ბოლოდან */
+            }
+            100% {
+                left: 100vw; /* მივიდეს ეკრანის მარჯვენა ბოლომდე */
+            }
+        }
+
+        /* კლასი, რომელიც დაემატება JavaScript-დან ანიმაციის გასაშვებად */
+        .dog-move-active {
+            display: block; /* გამოჩნდეს */
+            animation: moveDog linear forwards; /* ერთხელ გაიაროს და გაჩერდეს ბოლოს */
+            animation-duration: 13.34s; /* ანიმაციის ხანგრძლივობა (2-ჯერ ნელა: 6.67s * 2 = 13.34s) */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="water-fill"></div>
+
+        <h1>დალეული წყლის კალკულატორი</h1>
+        <div class="form-group">
+            <label for="gender">სქესი:</label>
+            <select id="gender">
+                <option value="male">კაცი</option>
+                <option value="female">ქალი</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="weight">წონა (კგ):</label>
+            <input type="number" id="weight" min="1" step="0.1" placeholder="შეიყვანეთ წონა" required>
+        </div>
+        <div class="form-group">
+            <label for="height">სიმაღლე (სმ):</label>
+            <input type="number" id="height" min="1" step="0.1" placeholder="შეიყვანეთ სიმაღლე" required>
+        </div>
+        <div class="form-group">
+            <label for="cupVolume">ჭიქის მოცულობა (მლ):</label>
+            <input type="number" id="cupVolume" min="1" step="1" placeholder="შეიყვანეთ ჭიქის მოცულობა" required>
+        </div>
+        <div class="form-group">
+            <label for="cupCount">ჭიქის რაოდენობა:</label>
+            <input type="number" id="cupCount" min="0" step="1" value="0" placeholder="შეიყვანეთ დალეული ჭიქების რაოდენობა" required>
+        </div>
+        <button id="calculateBtn">კალკულაცია</button>
+
+        <div id="results">
+            <p><strong>საჭიროა მიიღოთ:</strong> <span id="requiredWater"></span> ლიტრი</p>
+            <p><strong>მიღებულია:</strong> <span id="consumedWater"></span> ლიტრი</p>
+            <p><strong>მიღებული წილი:</strong> <span id="percentage"></span>%</p>
+        </div>
+    </div>
+
+    <div class="dog-animation" id="animatedDog"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultsDiv = document.getElementById('results');
+            const requiredWaterSpan = document.getElementById('requiredWater');
+            const consumedWaterSpan = document.getElementById('consumedWater');
+            const percentageSpan = document.getElementById('percentage');
+            const animatedDog = document.getElementById('animatedDog');
+            const waterFillDiv = document.getElementById('water-fill'); // ახალი ელემენტი
+
+            // ძაღლის ანიმაციის პარამეტრები
+            const frameWidth = 752;
+            const frameHeight = 808;
+            const totalFrames = 4;
+            const framesPerRow = 4;
+            let currentFrame = 0;
+            const animationSpeed = 150; // ფრეიმების ცვლის სიჩქარე (ძაღლის "სირბილის" სიჩქარე)
+
+            let frameAnimationInterval;
+
+            function startDogFrameAnimation() {
+                if (frameAnimationInterval) {
+                    clearInterval(frameAnimationInterval);
+                }
+                currentFrame = 0;
+                frameAnimationInterval = setInterval(animateDogFrames, animationSpeed);
+            }
+
+            function animateDogFrames() {
+                const col = currentFrame % framesPerRow;
+                const backgroundX = -col * frameWidth;
+                const backgroundY = 0;
+
+                animatedDog.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
+
+                currentFrame = (currentFrame + 1) % totalFrames;
+            }
+
+            animatedDog.addEventListener('animationend', () => {
+                animatedDog.classList.remove('dog-move-active');
+                animatedDog.style.left = '-300px';
+                clearInterval(frameAnimationInterval);
+                animatedDog.style.display = 'none';
+            });
+
+
+            calculateBtn.addEventListener('click', () => {
+                const gender = document.getElementById('gender').value;
+                const weight = parseFloat(document.getElementById('weight').value);
+                const height = parseFloat(document.getElementById('height').value);
+                const cupVolume = parseFloat(document.getElementById('cupVolume').value);
+                const cupCount = parseFloat(document.getElementById('cupCount').value);
+
+                if (isNaN(weight) || weight <= 0 || isNaN(height) || height <= 0 || isNaN(cupVolume) || cupVolume <= 0 || isNaN(cupCount) || cupCount < 0) {
+                    alert('გთხოვთ, შეავსოთ ყველა ველი სწორად. წონა, სიმაღლე და ჭიქის მოცულობა უნდა იყოს დადებითი რიცხვები, ჭიქის რაოდენობა - არაუარყოფითი.');
+                    return;
+                }
+
+                let requiredWaterML;
+
+                if (gender === 'male') {
+                    requiredWaterML = weight * 35;
+                } else { // female
+                    requiredWaterML = weight * 31;
+                }
+
+                const consumedWaterML = cupVolume * cupCount;
+
+                const requiredWaterL = (requiredWaterML / 1000).toFixed(2);
+                const consumedWaterL = (consumedWaterML / 1000).toFixed(2);
+
+                let percentage = 0;
+                if (requiredWaterML > 0) {
+                    percentage = ((consumedWaterML / requiredWaterML) * 100); // პროცენტი მთელი რიცხვით
+                }
+
+                requiredWaterSpan.textContent = requiredWaterL;
+                consumedWaterSpan.textContent = consumedWaterL;
+                percentageSpan.textContent = percentage.toFixed(2); // პროცენტი 2 ათობითი ნიშნით
+
+                resultsDiv.style.display = 'block';
+
+                // წყლის დონის განახლება
+                let fillPercentage = Math.min(percentage, 100); // არასდროს არ გადაცდეს 100%-ს
+                waterFillDiv.style.height = `${fillPercentage}%`;
+
+
+                // ძაღლის ანიმაციის გაშვება
+                animatedDog.style.display = 'block';
+                animatedDog.classList.remove('dog-move-active');
+                void animatedDog.offsetWidth;
+                animatedDog.classList.add('dog-move-active');
+                startDogFrameAnimation();
+            });
+        });
+    </script>
+</body>
+</html>
